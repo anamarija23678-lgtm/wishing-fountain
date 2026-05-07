@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#050810">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Wishing Fountain">
+<meta name="description" content="Toss a coin. Make a wish. Discover your fate.">
+<link rel="manifest" href="manifest.json">
+<title>Wishing Fountain</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #f0d070;
+  --gold-dim: #7a6230;
+  --water: #0d3a5c;
+  --water-light: #1a6a9a;
+  --deep: #050810;
+  --midnight: #0d1825;
+  --text: #e8d5b0;
+  --text-dim: #8899aa;
+  --text-faint: #445566;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--deep);
+  color: var(--text);
+  font-family: 'Crimson Pro', Georgia, serif;
+  overflow-x: hidden;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* HEADER */
+header {
+  width: 100%;
+  text-align: center;
+  padding: 28px 24px 0;
+  position: relative;
+  z-index: 10;
+}
+
+.header-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 6px;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.header-title {
+  font-family: 'Cinzel', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--gold-light);
+  letter-spacing: 3px;
+  text-shadow: 0 0 40px rgba(201,168,76,0.4);
+}
+
+.header-sub {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* CANVAS */
+#fountain-wrap {
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 280px;
+}
+
+/* COIN BUTTON */
+.toss-section {
+  width: 100%;
+  max-width: 500px;
+  padding: 0 24px;
+  margin-top: -10px;
+  position: relative;
+  z-index: 10;
+}
+
+.coin-btn {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #8a6020, var(--gold), #f0d070, var(--gold), #8a6020);
+  background-size: 200% 100%;
+  border: none;
+  border-radius: 60px;
+  color: #1a0a00;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  cursor: pointer;
+  animation: shimmer 3s infinite;
+  transition: transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 4px 30px rgba(201,168,76,0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.coin-btn:active { transform: scale(0.97); }
+.coin-btn:hover { box-shadow: 0 4px 40px rgba(201,168,76,0.5); }
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.price-note {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: 8px;
+  letter-spacing: 1px;
+}
+
+/* FATE CARD */
+.fate-section {
+  width: 100%;
+  max-width: 500px;
+  padding: 16px 24px;
+}
+
+.fate-card {
+  background: linear-gradient(135deg, rgba(13,58,92,0.3), rgba(5,8,16,0.5));
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.5s;
+}
+
+.fate-card.revealed {
+  border-color: rgba(201,168,76,0.4);
+  animation: cardGlow 2s ease-out;
+}
+
+@keyframes cardGlow {
+  0% { box-shadow: 0 0 0 rgba(201,168,76,0); }
+  50% { box-shadow: 0 0 30px rgba(201,168,76,0.3); }
+  100% { box-shadow: 0 0 10px rgba(201,168,76,0.1); }
+}
+
+.fate-label {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 4px;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.fate-text {
+  font-size: 16px;
+  color: var(--text);
+  font-style: italic;
+  line-height: 1.6;
+  transition: opacity 0.5s;
+}
+
+.fate-number {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  color: var(--gold);
+  margin-top: 8px;
+  letter-spacing: 2px;
+}
+
+/* DIVIDER */
+.divider {
+  width: 100%;
+  max-width: 500px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+}
+
+.divider-line { flex: 1; height: 1px; background: rgba(255,255,255,0.05); }
+.divider-text { font-size: 9px; letter-spacing: 3px; color: var(--text-faint); text-transform: uppercase; }
+
+/* WALL */
+.wall-section {
+  width: 100%;
+  max-width: 500px;
+  padding: 8px 24px 32px;
+}
+
+.wall-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.wall-title {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+}
+
+.wall-count {
+  font-size: 11px;
+  color: var(--gold-dim);
+}
+
+.wish-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wish-flag { font-size: 18px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+
+.wish-body { flex: 1; }
+
+.wish-text {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.wish-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 3px;
+  align-items: center;
+}
+
+.wish-fate {
+  font-size: 10px;
+  color: var(--gold-dim);
+  font-style: normal;
+}
+
+.wish-time { font-size: 10px; color: var(--text-faint); }
+
+/* STATS BAR */
+.stats-bar {
+  width: 100%;
+  max-width: 500px;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-around;
+  background: rgba(255,255,255,0.02);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  margin: 8px 0;
+}
+
+.stat { text-align: center; }
+.stat-num { font-family: 'Cinzel', serif; font-size: 18px; color: var(--gold); display: block; }
+.stat-label { font-size: 9px; letter-spacing: 2px; color: var(--text-faint); text-transform: uppercase; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: rgba(13,58,92,0.95);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 13px;
+  color: var(--text);
+  font-style: italic;
+  white-space: nowrap;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="header-eyebrow">✦ Ancient Ritual, Digital Age ✦</div>
+    <div class="header-title">Wishing Fountain</div>
+    <div class="header-sub">Toss a coin. Discover your fate.</div>
+  </header>
+
+  <div id="fountain-wrap">
+    <canvas id="c"></canvas>
+  </div>
+
+  <div class="toss-section">
+    <button class="coin-btn" onclick="tossCoin()">🪙 &nbsp; TOSS A COIN &nbsp; — &nbsp; €1</button>
+    <div class="price-note">Your wish joins thousands across the world</div>
+  </div>
+
+  <div class="fate-section">
+    <div class="fate-card" id="fate-card">
+      <div class="fate-label">Your Fate</div>
+      <div class="fate-text" id="fate-text">The water awaits your coin...</div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-num" id="stat-today">2,847</span>
+      <span class="stat-label">Today</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="stat-countries">48</span>
+      <span class="stat-label">Countries</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="stat-total">184,291</span>
+      <span class="stat-label">All Time</span>
+    </div>
+  </div>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-text">Recent Wishes</div>
+    <div class="divider-line"></div>
+  </div>
+
+  <div class="wall-section">
+    <div class="wall-header">
+      <div class="wall-title">From Around the World</div>
+      <div class="wall-count" id="wall-count">Live</div>
+    </div>
+    <div id="wall"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── FATE ALGORITHM ─────────────────────────────────────────────────
+// No API needed. Pure math that feels personal.
+
+const FATE_MESSAGES = [
+  "What you seek is already closer than it appears.",
+  "The turning point you've been waiting for is near.",
+  "Trust the path that feels uncertain — it leads somewhere real.",
+  "Something you released will find its way back to you.",
+  "The answer you keep avoiding is the right one.",
+  "A door you forgot about is about to open.",
+  "What others doubt in you is exactly your strength.",
+  "The smallest step today will echo for years.",
+  "You are further along than you think.",
+  "Let go of the version of events you planned — the real one is better.",
+  "Someone is thinking of you right now.",
+  "The waiting is almost over.",
+  "Your instinct was correct the first time.",
+  "What felt like failure was preparation.",
+  "The thing you almost gave up on — don't.",
+  "A stranger will change something for you soon.",
+  "You've carried this long enough. Set it down.",
+  "The version of you from 5 years ago would be proud.",
+  "Something is ending so something better can begin.",
+  "The universe has been listening.",
+];
+
+const FATE_NUMBERS = [
+  "Lucky number: 7 ✦ Element: Water",
+  "Sacred number: 3 ✦ Element: Fire", 
+  "Resonance: 11 ✦ Element: Air",
+  "Vibration: 9 ✦ Element: Earth",
+  "Frequency: 22 ✦ Element: Ether",
+  "Alignment: 4 ✦ Element: Water",
+  "Cycle: 8 ✦ Element: Fire",
+];
+
+function getFate(coinIndex) {
+  // Deterministic but feels random — based on time + count
+  const seed = (Date.now() % 997) + coinIndex * 137;
+  const msgIdx = seed % FATE_MESSAGES.length;
+  const numIdx = (seed * 7) % FATE_NUMBERS.length;
+  return {
+    message: FATE_MESSAGES[msgIdx],
+    number: FATE_NUMBERS[numIdx],
+  };
+}
+
+// ─── WALL DATA ───────────────────────────────────────────────────────
+
+const INITIAL_WISHES = [
+  { flag: '🇩🇪', text: 'Health for my whole family', fate: 'Sacred number: 3', time: '1m ago' },
+  { flag: '🇬🇧', text: 'To find love before the year ends', fate: 'Lucky number: 7', time: '3m ago' },
+  { flag: '🇺🇸', text: 'Courage to start over', fate: 'Vibration: 9', time: '5m ago' },
+  { flag: '🇫🇷', text: 'May my dream finally come true', fate: 'Resonance: 11', time: '8m ago' },
+  { flag: '🇧🇷', text: 'Peace for everyone I love', fate: 'Frequency: 22', time: '11m ago' },
+  { flag: '🇯🇵', text: 'To return here one day', fate: 'Cycle: 8', time: '15m ago' },
+  { flag: '🇮🇹', text: 'A fresh start and good health', fate: 'Alignment: 4', time: '19m ago' },
+];
+
+const FLAGS = ['🇭🇷','🇮🇹','🇦🇹','🇳🇱','🇸🇪','🇵🇱','🇦🇺','🇧🇷','🇨🇦','🇪🇸','🇰🇷','🇿🇦','🇲🇽','🇹🇷','🇬🇷','🇵🇹','🇨🇿','🇺🇦','🇸🇬','🇳🇿'];
+
+const WISH_TEXTS = [
+  'Health and happiness for my family',
+  'To find what I have been looking for',
+  'Courage to take the leap',
+  'Love that lasts',
+  'Success in what truly matters',
+  'To finally let go',
+  'A new beginning',
+  'Peace of mind',
+  'The strength to keep going',
+  'One more chance',
+];
+
+let coinCount = 2847;
+let totalCount = 184291;
+let countriesCount = 48;
+let tosses = 0;
+
+function updateStats() {
+  document.getElementById('stat-today').textContent = coinCount.toLocaleString();
+  document.getElementById('stat-total').textContent = totalCount.toLocaleString();
+  document.getElementById('stat-countries').textContent = countriesCount;
+}
+
+function addWishToWall(flag, text, fate, time) {
+  const wall = document.getElementById('wall');
+  const item = document.createElement('div');
+  item.className = 'wish-item';
+  item.innerHTML = `
+    <div class="wish-flag">${flag}</div>
+    <div class="wish-body">
+      <div class="wish-text">"${text}"</div>
+      <div class="wish-meta">
+        <span class="wish-fate">${fate}</span>
+        <span class="wish-time">· ${time}</span>
+      </div>
+    </div>
+  `;
+  wall.insertBefore(item, wall.firstChild);
+  if (wall.children.length > 8) wall.removeChild(wall.lastChild);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function tossCoin() {
+  window.open('https://www.paypal.me/bluewave1984/1', '_blank');
+  tosses++;
+  coinCount++;
+  totalCount++;
+  updateStats();
+
+  const fate = getFate(tosses);
+  
+  // Animate fate card
+  const card = document.getElementById('fate-card');
+  const fateText = document.getElementById('fate-text');
+  card.classList.remove('revealed');
+  fateText.style.opacity = '0';
+  
+  // Throw coin in canvas
+  throwCanvasCoin();
+
+  setTimeout(() => {
+    fateText.textContent = fate.message;
+    fateText.style.opacity = '1';
+    
+    // Add fate number if not exists
+    let fateNum = card.querySelector('.fate-number');
+    if (!fateNum) {
+      fateNum = document.createElement('div');
+      fateNum.className = 'fate-number';
+      card.appendChild(fateNum);
+    }
+    fateNum.textContent = fate.number;
+    
+    card.classList.add('revealed');
+
+    // Add to wall
+    const flag = FLAGS[Math.floor(Math.random() * FLAGS.length)];
+    const wishText = WISH_TEXTS[Math.floor(Math.random() * WISH_TEXTS.length)];
+    addWishToWall(flag, wishText, fate.number.split(' ✦')[0], 'just now');
+
+    showToast('✦ Your wish has been received');
+  }, 800);
+}
+
+// ─── CANVAS FOUNTAIN ────────────────────────────────────────────────
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const DPR = Math.min(devicePixelRatio || 1, 2);
+
+function resize() {
+  canvas.width = canvas.offsetWidth * DPR;
+  canvas.height = 280 * DPR;
+}
+resize();
+
+const W = () => canvas.width;
+const H = () => canvas.height;
+
+function rand(a, b) { return a + Math.random() * (b - a); }
+
+// Particles
+const particles = [];
+for (let i = 0; i < 60; i++) {
+  particles.push({
+    x: rand(0, 1), y: rand(0.55, 1),
+    vx: rand(-0.0003, 0.0003), vy: rand(-0.0004, -0.0001),
+    alpha: rand(0.1, 0.4), size: rand(1, 2.5) * DPR,
+    color: `hsl(${rand(200, 230)},${rand(40,70)}%,${rand(60,85)}%)`
+  });
+}
+
+// Droplets
+const droplets = [];
+const splashes = [];
+const ripples = [];
+const coins = [];
+
+function spawnDroplets() {
+  const cx = 0.5, base = 0.52;
+  const count = 12;
+  for (let i = 0; i < count; i++) {
+    if (Math.random() > 0.4) continue;
+    const angle = (i / count) * Math.PI * 2;
+    const spread = rand(0.04, 0.12);
+    const speed = rand(0.003, 0.009);
+    droplets.push({
+      x: cx, y: base,
+      vx: Math.cos(angle) * speed * spread * 8,
+      vy: -rand(0.006, 0.016),
+      alpha: rand(0.5, 0.9),
+      size: rand(1.5, 3) * DPR,
+      gravity: 0.00028 * DPR,
+      splashed: false,
+    });
+  }
+}
+
+function spawnSplash(x, y) {
+  for (let i = 0; i < 14; i++) {
+    const angle = rand(0, Math.PI * 2);
+    const speed = rand(0.002, 0.006);
+    splashes.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - rand(0.002, 0.006),
+      alpha: rand(0.4, 0.8),
+      size: rand(1.5, 3.5) * DPR,
+      gravity: 0.00025,
+    });
+  }
+  ripples.push({ x, y, r: 3 * DPR, maxR: rand(0.06, 0.12), alpha: 0.6 });
+}
+
+function throwCanvasCoin() {
+  coins.push({
+    x: rand(0.3, 0.7), y: 0,
+    vy: 0.004, alpha: 1,
+    size: rand(8, 14) * DPR,
+    rotation: 0, rotSpeed: rand(0.08, 0.15),
+    splashed: false,
+  });
+}
+
+function drawBg(t) {
+  const w = W(), h = H();
+  const g = ctx.createLinearGradient(0, 0, 0, h * 0.45);
+  g.addColorStop(0, '#030508');
+  g.addColorStop(1, '#0d1825');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h * 0.45);
+
+  // Stars
+  for (let i = 0; i < 40; i++) {
+    const sx = ((i * 137.5) % 1) * w;
+    const sy = ((i * 73.3) % 0.38) * h;
+    const flicker = 0.2 + Math.sin(t * 1.5 + i) * 0.2;
+    ctx.beginPath();
+    ctx.arc(sx, sy, 1.2 * DPR, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,220,${flicker})`;
+    ctx.fill();
+  }
+}
+
+function drawWater(t) {
+  const w = W(), h = H();
+  const g = ctx.createLinearGradient(0, h * 0.4, 0, h);
+  g.addColorStop(0, '#0d3a5c');
+  g.addColorStop(0.4, '#0a2a45');
+  g.addColorStop(1, '#061828');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, h * 0.38, w, h * 0.62);
+
+  for (let i = 0; i < 5; i++) {
+    const y = h * (0.44 + i * 0.1) + Math.sin(t * 1.2 + i * 0.7) * 5 * DPR;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    for (let x = 0; x <= w; x += 5) {
+      ctx.lineTo(x, y + Math.sin(x / w * 10 + t * 1.5 + i) * 4 * DPR + Math.sin(x / w * 20 + t * 0.8) * 2 * DPR);
+    }
+    ctx.strokeStyle = `rgba(74,158,186,${0.12 - i * 0.015})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+}
+
+function drawFountain(t) {
+  const w = W(), h = H();
+  const cx = w * 0.5, base = h * 0.52;
+
+  // Basin
+  ctx.save();
+  ctx.beginPath();
+  ctx.ellipse(cx, base + 8 * DPR, 55 * DPR, 13 * DPR, 0, 0, Math.PI * 2);
+  const bg = ctx.createRadialGradient(cx, base, 3 * DPR, cx, base + 8 * DPR, 55 * DPR);
+  bg.addColorStop(0, 'rgba(60,140,200,0.5)');
+  bg.addColorStop(1, 'rgba(20,60,100,0.2)');
+  ctx.fillStyle = bg;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(80,180,220,0.25)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.restore();
+
+  // Streams
+  ctx.save();
+  for (let s = 0; s < 3; s++) {
+    const streams = 10 + s * 5;
+    const spread = (0.5 + s * 0.25) * DPR * 28;
+    const height = (90 - s * 22) * DPR;
+    for (let i = 0; i < streams; i++) {
+      const angle = (i / streams) * Math.PI * 2;
+      const wobble = Math.sin(t * 1.8 + i * 0.7) * 0.06;
+      const ex = cx + Math.cos(angle + wobble) * spread;
+      const ey = base - height + Math.sin(angle + wobble) * spread * 0.3 + Math.sin(t * 2 + i) * 7 * DPR;
+      const alpha = (0.35 - s * 0.08) * (0.7 + Math.sin(t + i) * 0.3);
+      ctx.beginPath();
+      ctx.moveTo(cx, base);
+      ctx.quadraticCurveTo(cx + Math.cos(angle) * spread * 0.6, base - height * 1.3, ex, ey);
+      ctx.strokeStyle = `rgba(120,210,255,${alpha})`;
+      ctx.lineWidth = 1 + Math.sin(t + i) * 0.4;
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+let frame = 0;
+
+function draw(ts) {
+  const t = ts / 1000;
+  const w = W(), h = H();
+  ctx.clearRect(0, 0, w, h);
+
+  drawBg(t);
+  drawWater(t);
+
+  // Particles
+  ctx.save();
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.y < 0.3 || p.y > 1) { p.y = rand(0.55, 0.95); p.x = rand(0, 1); }
+    ctx.beginPath();
+    ctx.arc(p.x * w, p.y * h, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.alpha * 0.4;
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  // Spawn droplets
+  if (frame % 2 === 0) spawnDroplets();
+  frame++;
+
+  const waterY = h * 0.52;
+
+  // Droplets
+  droplets.forEach(d => {
+    d.x += d.vx; d.y += d.vy; d.vy += d.gravity; d.alpha -= 0.01;
+    if (!d.splashed && d.y * h >= waterY && d.vy > 0) {
+      d.splashed = true;
+      if (Math.random() < 0.25) spawnSplash(d.x * w, waterY);
+      ripples.push({ x: d.x * w, y: waterY, r: 2 * DPR, maxR: rand(12, 28) * DPR, alpha: 0.35 });
+    }
+    if (d.alpha > 0 && !d.splashed) {
+      ctx.beginPath(); ctx.arc(d.x * w, d.y * h, d.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(150,220,255,${d.alpha})`; ctx.fill();
+    }
+  });
+  for (let i = droplets.length - 1; i >= 0; i--) {
+    if (droplets[i].alpha <= 0 || droplets[i].y > 1) droplets.splice(i, 1);
+  }
+
+  // Splashes
+  splashes.forEach(s => {
+    s.x += s.vx * w; s.y += s.vy * h; s.vy += s.gravity; s.alpha -= 0.022;
+    if (s.alpha > 0) {
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(180,235,255,${s.alpha})`; ctx.fill();
+    }
+  });
+  for (let i = splashes.length - 1; i >= 0; i--) { if (splashes[i].alpha <= 0) splashes.splice(i, 1); }
+
+  // Ripples
+  ripples.forEach(r => {
+    r.r += 2.2; r.alpha -= 0.016;
+    ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(120,210,255,${r.alpha})`; ctx.lineWidth = 1; ctx.stroke();
+  });
+  for (let i = ripples.length - 1; i >= 0; i--) { if (ripples[i].alpha <= 0) ripples.splice(i, 1); }
+
+  // Coins
+  coins.forEach(c => {
+    c.y += c.vy; c.vy += 0.0003 * DPR * 10; c.rotation += c.rotSpeed; c.alpha -= 0.006;
+    if (!c.splashed && c.y * h >= waterY) {
+      c.splashed = true;
+      spawnSplash(c.x * w, waterY);
+    }
+    if (c.alpha > 0) {
+      ctx.save(); ctx.translate(c.x * w, c.y * h); ctx.rotate(c.rotation);
+      ctx.beginPath(); ctx.ellipse(0, 0, c.size, c.size * 0.35, 0, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(220,180,60,${c.alpha})`; ctx.fill();
+      ctx.restore();
+    }
+  });
+  for (let i = coins.length - 1; i >= 0; i--) { if (coins[i].alpha <= 0 || coins[i].y > 1.2) coins.splice(i, 1); }
+
+  drawFountain(t);
+  requestAnimationFrame(draw);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────
+
+// Load initial wall
+INITIAL_WISHES.forEach((w, i) => {
+  setTimeout(() => addWishToWall(w.flag, w.text, w.fate, w.time), i * 150);
+});
+
+updateStats();
+requestAnimationFrame(draw);
+
+// Simulate live activity
+setInterval(() => {
+  if (Math.random() < 0.3) {
+    coinCount++;
+    totalCount++;
+    updateStats();
+    const flag = FLAGS[Math.floor(Math.random() * FLAGS.length)];
+    const text = WISH_TEXTS[Math.floor(Math.random() * WISH_TEXTS.length)];
+    const fateNum = FATE_NUMBERS[Math.floor(Math.random() * FATE_NUMBERS.length)];
+    addWishToWall(flag, text, fateNum.split(' ✦')[0], 'just now');
+    setTimeout(() => {
+      const items = document.querySelectorAll('.wish-item');
+      items.forEach((item, i) => {
+        if (i > 0) {
+          const timeEl = item.querySelector('.wish-time');
+          if (timeEl && timeEl.textContent === '· just now') timeEl.textContent = '· 1m ago';
+        }
+      });
+    }, 60000);
+  }
+}, 8000);
+</script>
+</body>
+</html>
